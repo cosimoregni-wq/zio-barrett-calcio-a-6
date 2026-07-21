@@ -145,32 +145,45 @@ async def mostra_calendario(update):
 
 async def mostra_prossima(update):
 
+    from datetime import datetime
+
+async def mostra_prossima(update):
+
     ws = sheet.worksheet("CALENDARIO")
 
     dati = ws.get_all_records()
 
-    if not dati:
+    oggi = datetime.now().strftime("%d/%m/%Y")
 
-        await update.message.reply_text(
-            "Nessuna partita trovata."
-        )
-        return
-
-    prossima_data = str(dati[0]["DATA"]).strip()
-
-    testo = (
-        f"⚽ PARTITE DEL {prossima_data}\n\n"
-    )
+    partite_oggi = []
 
     for partita in dati:
 
-        if str(partita["DATA"]).strip() == prossima_data:
+        data_partita = str(
+            partita["DATA"]
+        ).strip()
 
-            testo += (
-                f"🕒 {partita['ORA']}:00\n"
-                f"⚽ {partita['CASA']} vs {partita['TRASFERTA']}\n"
-                f"🏟 {partita['CAMPO']}\n\n"
-            )
+        if data_partita == oggi:
+
+            partite_oggi.append(partita)
+
+    if not partite_oggi:
+
+        await update.message.reply_text(
+            f"Nessuna partita trovata per il {oggi}"
+        )
+
+        return
+
+    testo = f"⚽ PARTITE DI OGGI ({oggi})\n\n"
+
+    for partita in partite_oggi:
+
+        testo += (
+            f"🕒 {partita['ORA']}:00\n"
+            f"⚽ {partita['CASA']} vs {partita['TRASFERTA']}\n"
+            f"🏟 {partita['CAMPO']}\n\n"
+        )
 
     await update.message.reply_text(testo)
 
