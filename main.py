@@ -153,29 +153,47 @@ async def mostra_prossima(update):
 
     dati = ws.get_all_records()
 
-    oggi = datetime.now().strftime("%d/%m/%Y")
+    oggi = datetime.now().date()
 
     partite_oggi = []
 
     for partita in dati:
 
-        data_partita = str(
-            partita["DATA"]
-        ).strip()
+        try:
 
-        if data_partita == oggi:
+            data_val = partita["DATA"]
 
-            partite_oggi.append(partita)
+            if isinstance(data_val, str):
+
+                data_partita = datetime.strptime(
+                    data_val.strip(),
+                    "%d/%m/%Y"
+                ).date()
+
+            else:
+
+                data_partita = data_val
+
+            if data_partita == oggi:
+
+                partite_oggi.append(partita)
+
+        except Exception as e:
+
+            print("Errore data:", e)
 
     if not partite_oggi:
 
         await update.message.reply_text(
-            f"Nessuna partita trovata per il {oggi}"
+            f"❌ Nessuna partita trovata per oggi ({oggi.strftime('%d/%m/%Y')})"
         )
 
         return
 
-    testo = f"⚽ PARTITE DI OGGI ({oggi})\n\n"
+    testo = (
+        f"⚽ PARTITE DI OGGI\n"
+        f"📅 {oggi.strftime('%d/%m/%Y')}\n\n"
+    )
 
     for partita in partite_oggi:
 
