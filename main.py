@@ -63,7 +63,7 @@ async def mostra_rosa(update):
 
     dati = ws.get_all_records()
 
-    testo = "👥 ROSA FC ROCCARASO\n\n"
+    testo = "👥 ROSA ZIO BARRETT-GWINE\n\n"
 
     for r in dati:
         testo += f"{r['NR']} - {r['NOME']}\n"
@@ -113,7 +113,7 @@ async def mostra_calendario(update):
 
     dati = ws.get_all_records()
 
-    testo = "📅 CALENDARIO FC ROCCARASO\n\n"
+    testo = "📅 CALENDARIO ZIO BARRETT-GWINE\n\n"
 
     trovate = 0
 
@@ -213,7 +213,7 @@ async def mostra_classifica(update):
 
     for s in squadre:
 
-        nome = s["NOME SQUADRA"]
+        nome = s["Nome Squadra"]
 
         classifica[nome] = {
             "PT": 0,
