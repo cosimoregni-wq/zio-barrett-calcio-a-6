@@ -143,9 +143,7 @@ async def mostra_calendario(update):
 # PROSSIMA GIORNATA
 # ==================================
 
-async def mostra_prossima(update):
-
-   from datetime import datetime
+from datetime import datetime
 
 async def mostra_prossima(update):
 
@@ -153,7 +151,7 @@ async def mostra_prossima(update):
 
     dati = ws.get_all_records()
 
-    oggi = datetime.now().strftime("%d/%m/%Y")
+    oggi = "21/07/2026"
 
     testo = f"⚽ PARTITE DI OGGI ({oggi})\n\n"
 
@@ -176,8 +174,7 @@ async def mostra_prossima(update):
     if trovate == 0:
 
         testo = (
-            f"❌ Nessuna partita trovata per il {oggi}\n\n"
-            f"Controlla che la data nel foglio sia identica."
+            f"❌ Nessuna partita trovata per il {oggi}"
         )
 
     await update.message.reply_text(testo)
