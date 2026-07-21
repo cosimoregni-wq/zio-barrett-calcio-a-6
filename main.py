@@ -1,5 +1,11 @@
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
 import os
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -37,14 +43,15 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "🚑 Indisponibili":
         await update.message.reply_text("Funzione indisponibili in preparazione.")
 
-async def main():
+    else:
+        await update.message.reply_text("Seleziona una voce dal menu.")
+
+if __name__ == "__main__":
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT, menu))
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, menu)
+    )
 
-    await app.run_polling()
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    app.run_polling()
