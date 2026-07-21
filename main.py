@@ -41,7 +41,6 @@ creds = Credentials.from_service_account_info(
 )
 
 client = gspread.authorize(creds)
-
 sheet = client.open_by_key(SPREADSHEET_ID)
 
 
@@ -53,6 +52,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ==================================
+# ROSA
+# ==================================
+
 async def mostra_rosa(update):
 
     ws = sheet.worksheet("ROSA")
@@ -61,15 +64,19 @@ async def mostra_rosa(update):
     testo = "👥 ROSA ZIO BARRETT - GWINE\n\n"
 
     for r in dati:
-
         testo += f"{r['NR']} - {r['NOME']}\n"
 
     await update.message.reply_text(testo)
 
 
+# ==================================
+# INDISPONIBILI
+# ==================================
+
 async def mostra_indisponibili(update):
 
     ws = sheet.worksheet("STATO ROSA")
+
     dati = ws.get_all_records()
 
     testo = "🚑 INDISPONIBILI\n\n"
@@ -91,11 +98,14 @@ async def mostra_indisponibili(update):
             )
 
     if not trovati:
-
         testo = "✅ Nessun indisponibile"
 
     await update.message.reply_text(testo)
 
+
+# ==================================
+# CALENDARIO DELLA SQUADRA
+# ==================================
 
 async def mostra_calendario(update):
 
@@ -105,12 +115,16 @@ async def mostra_calendario(update):
 
     testo = "📅 CALENDARIO ZIO BARRETT - GWINE\n\n"
 
+    count = 0
+
     for partita in dati:
 
         casa = str(partita["CASA"]).strip()
         trasferta = str(partita["TRASFERTA"]).strip()
 
         if casa == SQUADRA or trasferta == SQUADRA:
+
+            count += 1
 
             testo += (
                 f"📅 {partita['DATA']}\n"
@@ -119,8 +133,15 @@ async def mostra_calendario(update):
                 f"🏟 {partita['CAMPO']}\n\n"
             )
 
+    if count == 0:
+        testo = "Nessuna partita trovata."
+
     await update.message.reply_text(testo)
 
+
+# ==================================
+# PROSSIMA GIORNATA
+# ==================================
 
 async def mostra_prossima(update):
 
@@ -128,29 +149,35 @@ async def mostra_prossima(update):
 
     dati = ws.get_all_records()
 
-    for partita in dati:
+    if not dati:
 
-        casa = str(partita["CASA"]).strip()
-        trasferta = str(partita["TRASFERTA"]).strip()
+        await update.message.reply_text(
+            "Nessuna partita trovata."
+        )
+        return
 
-        if casa == SQUADRA or trasferta == SQUADRA:
+    prossima_data = str(dati[0]["DATA"]).strip()
 
-            testo = (
-                "⚽ PROSSIMA PARTITA\n\n"
-                f"{casa} vs {trasferta}\n\n"
-                f"📅 {partita['DATA']}\n"
-                f"🕒 {partita['ORA']}:00\n"
-                f"🏟 {partita['CAMPO']}"
-            )
-
-            await update.message.reply_text(testo)
-
-            return
-
-    await update.message.reply_text(
-        "Nessuna partita trovata."
+    testo = (
+        f"⚽ PARTITE DEL {prossima_data}\n\n"
     )
 
+    for partita in dati:
+
+        if str(partita["DATA"]).strip() == prossima_data:
+
+            testo += (
+                f"🕒 {partita['ORA']}:00\n"
+                f"⚽ {partita['CASA']} vs {partita['TRASFERTA']}\n"
+                f"🏟 {partita['CAMPO']}\n\n"
+            )
+
+    await update.message.reply_text(testo)
+
+
+# ==================================
+# CLASSIFICA
+# ==================================
 
 async def mostra_classifica(update):
 
@@ -239,7 +266,7 @@ async def mostra_classifica(update):
 
         except Exception as e:
 
-            print(e)
+            print("Errore Classifica:", e)
 
     classifica_ordinata = sorted(
         classifica.items(),
@@ -251,7 +278,7 @@ async def mostra_classifica(update):
         reverse=True
     )
 
-    testo = "🏆 CLASSIFICA\n\n"
+    testo = "🏆 CLASSIFICA TORNEO\n\n"
 
     posizione = 1
 
@@ -263,10 +290,10 @@ async def mostra_classifica(update):
 
         testo += (
             f"{playoff}{posizione}. {nome}\n"
-            f"🏅 {stats['PT']} pt\n"
-            f"🎮 {stats['PG']} pg\n"
-            f"⚽ {stats['GF']} gf\n"
-            f"🥅 {stats['GS']} gs\n"
+            f"🏅 {stats['PT']} pt | "
+            f"🎮 {stats['PG']} pg | "
+            f"⚽ {stats['GF']} gf | "
+            f"🥅 {stats['GS']} gs | "
             f"📊 {dr}\n\n"
         )
 
@@ -274,6 +301,10 @@ async def mostra_classifica(update):
 
     await update.message.reply_text(testo)
 
+
+# ==================================
+# MENU
+# ==================================
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -300,6 +331,10 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await mostra_classifica(update)
 
 
+# ==================================
+# AVVIO
+# ==================================
+
 if __name__ == "__main__":
 
     app = Application.builder().token(BOT_TOKEN).build()
@@ -314,5 +349,7 @@ if __name__ == "__main__":
             menu
         )
     )
+
+    print("Bot avviato...")
 
     app.run_polling()
