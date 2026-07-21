@@ -145,20 +145,42 @@ async def mostra_calendario(update):
 
 async def mostra_prossima(update):
 
+   from datetime import datetime
+
+async def mostra_prossima(update):
+
     ws = sheet.worksheet("CALENDARIO")
 
     dati = ws.get_all_records()
 
-    testo = ""
+    oggi = datetime.now().strftime("%d/%m/%Y")
+
+    testo = f"⚽ PARTITE DI OGGI ({oggi})\n\n"
+
+    trovate = 0
 
     for partita in dati:
 
-        testo += (
-            f"DATA={partita['DATA']} "
-            f"TIPO={type(partita['DATA'])}\n"
+        data_partita = str(partita["DATA"]).strip()
+
+        if data_partita == oggi:
+
+            trovate += 1
+
+            testo += (
+                f"🕒 {partita['ORA']}:00\n"
+                f"⚽ {partita['CASA']} vs {partita['TRASFERTA']}\n"
+                f"🏟 {partita['CAMPO']}\n\n"
+            )
+
+    if trovate == 0:
+
+        testo = (
+            f"❌ Nessuna partita trovata per il {oggi}\n\n"
+            f"Controlla che la data nel foglio sia identica."
         )
 
-    await update.message.reply_text(testo[:4000])
+    await update.message.reply_text(testo)
 
 # ==================================
 # CLASSIFICA
